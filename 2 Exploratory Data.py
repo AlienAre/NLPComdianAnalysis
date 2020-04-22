@@ -1,6 +1,6 @@
 import pandas as pd
 
-data = pd.read_pickle("MLtest\\NLPComdianAnalysis\\files\\dtm.pkl")
+data = pd.read_pickle("files\\dtm.pkl")
 data = data.transpose()
 #print(data.head())
 #print(data.index)
@@ -38,7 +38,7 @@ from sklearn.feature_extraction import text
 from sklearn.feature_extraction.text import CountVectorizer
 
 ##Read cleaned data
-data_clean = pd.read_pickle("MLtest\\NLPComdianAnalysis\\files\\data_clean.pkl")
+data_clean = pd.read_pickle("files\\data_clean.pkl")
 
 ##Add new stop words
 stop_words = text.ENGLISH_STOP_WORDS.union(add_stop_words)
@@ -54,8 +54,8 @@ data_stop.index = data_clean.index
 
 ##Pickle it for later use
 import pickle
-pickle.dump(cv, open("MLtest\\NLPComdianAnalysis\\files\\cv_stop.pkl", "wb"))
-data_stop.to_pickle("MLtest\\NLPComdianAnalysis\\files\\dtm_stop.pkl")
+pickle.dump(cv, open("files\\cv_stop.pkl", "wb"))
+data_stop.to_pickle("files\\dtm_stop.pkl")
 
 '''######################
 need to fix error: Microsoft Visual C++ 14.0 is required. to make following works
@@ -84,6 +84,22 @@ for index, comedian in enumerate(data.columns):
 plt.show()
 ####################'''
 
+##Identify the non-zero items in the document-term matrix, meaning that the word occurs at least once
+#print(data["ali"])
+#print(data["ali"].nonzero()[0])
+#print(data["ali"].nonzero()[0].size)
+full_names = ['Ali Wong', 'Anthony Jeselnik', 'Bill Burr', 'Bo Burnham', 'Dave Chappelle', 'Hasan Minhaj',
+              'Jim Jefferies', 'Joe Rogan', 'John Mulaney', 'Louis C.K.', 'Mike Birbiglia', 'Ricky Gervais']
+unique_list = []
+for comedian in data.columns: 
+    uniques = data[comedian].nonzero()[0].size
+    unique_list.append(uniques)
 
+##Create a new dataframe that contains this unique word count
+data_words = pd.DataFrame(list(zip(full_names, unique_list)), columns=["comedian","unique_words"])
+data_unique_sort = data_words.sort_values(by="unique_words")
+#print(data_unique_sort)
 
+##Calculate the words per minute of each comedian
 
+##Find the total number of words that a comedian uses
