@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 data = pd.read_pickle("files\\dtm.pkl")
 data = data.transpose()
@@ -65,7 +67,6 @@ from worldcloud import WordCloud
 wc = WordCloud(stopwords=stop_words, backgroud_color="white", colormap="Dark2", max_font_size=100, random_state=42)
 
 ##reset the output dimensions
-import matplotlib.pyplot as plt
 
 plt.rcParams['figure.figsize'] = [16, 6]
 
@@ -103,3 +104,62 @@ data_unique_sort = data_words.sort_values(by="unique_words")
 ##Calculate the words per minute of each comedian
 
 ##Find the total number of words that a comedian uses
+total_list =[]
+for comedian in data.columns:
+    total = sum(data[comedian])
+    total_list.append(total)
+
+##Comedy special run times from IMDB, in minutes
+run_times = [60, 59, 80, 60, 67, 73, 77, 63, 62, 58, 76, 79]
+
+data_words["total_words"] = total_list
+data_words["run_times"] = run_times
+data_words["word_per_mins"] = data_words["total_words"] / data_words["run_times"]
+
+data_wpm_sort = data_words.sort_values(by="word_per_mins")
+#print(data_wpm_sort)
+
+##plot the data
+plt.clf()
+y_pos = np.arange(len(data_words))
+
+plt.subplot(1,2,1)
+plt.barh(y_pos, data_unique_sort["unique_words"], align="center")
+plt.yticks(y_pos, data_unique_sort["comedian"])
+plt.title("Unique Words Count", fontsize=20)
+
+plt.subplot(1,2,2)
+plt.barh(y_pos, data_wpm_sort["word_per_mins"], align="center")
+plt.yticks(y_pos, data_wpm_sort["comedian"])
+plt.title("Words per Mins", fontsize=20)
+
+plt.tight_layout()
+#plt.show()
+
+##Analysis: Amount of Profanity
+Counter(words).most_common()
+
+##get bad words
+data_bad_words = data.transpose()[["fucking", "fuck", "shit"]]
+#print(data_bad_words)
+data_profanity = pd.concat([data_bad_words.fucking + data_bad_words.fuck, data_bad_words.shit], axis=1)
+data_profanity.columns = ["f_word", "s_word"]
+print(data_profanity)
+
+
+##Let's create a scatter plot of our findings
+plt.clf()
+plt.rcParams['figure.figsize'] = [10, 8]
+
+for i, comedian in enumerate(data_profanity.index):
+    x = data_profanity.f_word.loc[comedian]
+    y = data_profanity.s_word.loc[comedian]
+    plt.scatter(x, y, color='blue')
+    plt.text(x+1.5, y+0.5, full_names[i], fontsize=10)
+    plt.xlim(-5, 155) 
+    
+plt.title('Number of Bad Words Used in Routine', fontsize=20)
+plt.xlabel('Number of F Bombs', fontsize=15)
+plt.ylabel('Number of S Words', fontsize=15)
+
+plt.show()
